@@ -5,6 +5,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { Sidebar } from "@/components/sidebar"
 import { SidebarProvider, useSidebarContext } from "@/components/sidebar-layout"
 import { Menu } from "lucide-react"
+import { appConfig } from "@/app-config"
 
 type LayoutProps = { showHeader?: boolean }
 
@@ -48,11 +49,13 @@ function LayoutContent({ showHeader = true }: LayoutProps) {
               </Button>
               <div>
                 <h1 className="text-lg font-bold text-primary">
-                  インシデント管理
+                  {appConfig.appName}
                 </h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">
-                  Incident Management
-                </p>
+                {appConfig.appSubtitle && (
+                  <p className="text-xs text-muted-foreground hidden sm:block">
+                    {appConfig.appSubtitle}
+                  </p>
+                )}
               </div>
             </div>
 

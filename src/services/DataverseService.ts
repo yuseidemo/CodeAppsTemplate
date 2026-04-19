@@ -7,36 +7,40 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const DataverseService = {
-  async GetItems(_table: string, _query?: string): Promise<any[]> {
+  async GetItems(table: string, query?: string): Promise<any[]> {
     console.warn(
-      "[DataverseService stub] GetItems called — run 'npx power-apps add-data-source' to connect.",
+      `[DataverseService stub] GetItems(${table}${
+        query ? `, ${query}` : ""
+      }) called — run 'npx power-apps add-data-source' to connect.`,
     );
     return [];
   },
-  async GetItem(_table: string, _id: string, _query?: string): Promise<any> {
+  async GetItem(table: string, id: string, query?: string): Promise<any> {
     console.warn(
-      "[DataverseService stub] GetItem called — run 'npx power-apps add-data-source' to connect.",
+      `[DataverseService stub] GetItem(${table}, ${id}${
+        query ? `, ${query}` : ""
+      }) called — run 'npx power-apps add-data-source' to connect.`,
     );
     return null;
   },
-  async PostItem(_table: string, _body: Record<string, unknown>): Promise<any> {
+  async PostItem(table: string, body: Record<string, unknown>): Promise<any> {
     console.warn(
-      "[DataverseService stub] PostItem called — run 'npx power-apps add-data-source' to connect.",
+      `[DataverseService stub] PostItem(${table}, keys: ${Object.keys(body).join(", ")}) called — run 'npx power-apps add-data-source' to connect.`,
     );
     return {};
   },
   async PatchItem(
-    _table: string,
-    _id: string,
-    _body: Record<string, unknown>,
+    table: string,
+    id: string,
+    body: Record<string, unknown>,
   ): Promise<void> {
     console.warn(
-      "[DataverseService stub] PatchItem called — run 'npx power-apps add-data-source' to connect.",
+      `[DataverseService stub] PatchItem(${table}, ${id}, keys: ${Object.keys(body).join(", ")}) called — run 'npx power-apps add-data-source' to connect.`,
     );
   },
-  async DeleteItem(_table: string, _id: string): Promise<void> {
+  async DeleteItem(table: string, id: string): Promise<void> {
     console.warn(
-      "[DataverseService stub] DeleteItem called — run 'npx power-apps add-data-source' to connect.",
+      `[DataverseService stub] DeleteItem(${table}, ${id}) called — run 'npx power-apps add-data-source' to connect.`,
     );
   },
 };

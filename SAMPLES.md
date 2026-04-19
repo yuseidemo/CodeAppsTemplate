@@ -1,100 +1,30 @@
-# サンプル実装ガイド
+# Template Core ガイド
 
-本リポジトリには **開発標準・スキル（汎用テンプレート）** と **インシデント管理サンプル（リファレンス実装）** の 2 種類のコードが含まれています。
+このリポジトリは **template-core 中心** の構成です。  
+軽量なコンポーネントベースのダッシュボードから開始できるようにしました。
 
-## 構成の区分
+## 再利用の中心
 
-### そのまま再利用できるもの（開発標準・テンプレート）
+| パス                                    | 役割                                     |
+| --------------------------------------- | ---------------------------------------- |
+| `src/app-config.ts`                     | アプリ名・ナビ・ルーティングの集中設定   |
+| `src/template-core/module.ts`           | template-core のルート/メニュー定義      |
+| `src/template-core/pages/dashboard.tsx` | コンポーネントベースの軽量ダッシュボード |
+| `src/components/`                       | shadcn/ui + 共通コンポーネント           |
+| `src/providers/`                        | 共通 Provider 群                         |
+| `src/lib/`                              | 共通ユーティリティ                       |
+| `styles/`                               | Tailwind スタイル                        |
 
-| パス                               | 内容                                               |
-| ---------------------------------- | -------------------------------------------------- |
-| `.github/agents/`                  | GitHub Copilot カスタムエージェント定義            |
-| `.github/skills/`                  | 各フェーズの開発スキル（検証済み教訓・パターン集） |
-| `docs/`                            | 開発標準ドキュメント                               |
-| `src/components/`                  | shadcn/ui + カスタム UI コンポーネント             |
-| `src/providers/`                   | React Context Providers                            |
-| `src/lib/utils.ts`                 | ユーティリティ                                     |
-| `scripts/auth_helper.py`           | MSAL 認証ヘルパー                                  |
-| `plugins/`                         | Vite プラグイン                                    |
-| `styles/`                          | Tailwind CSS テーマ                                |
-| `patch-nameutils.cjs`              | 日本語 DisplayName パッチ                          |
-| `.env.example`                     | 環境変数テンプレート                               |
-| `package.json`                     | 依存関係（shadcn/ui, TanStack Query 等）           |
-| `vite.config.ts`, `tsconfig*.json` | ビルド設定                                         |
+## 使い始める手順
 
-### サンプル実装（プロジェクトに合わせて置き換え）
+1. `npm install`
+2. `npm run build` で初期状態を確認
+3. `src/template-core/pages/dashboard.tsx` を要件に合わせて編集
+4. メニューやルートを増やす場合は `src/template-core/module.ts` を更新
+5. 必要なら `src/app-config.ts` でモジュール切り替えを実施
 
-> インシデント管理（IT Service Management）を題材とした End-to-End のリファレンス実装です。
-> テーブル名・エージェント名・フロー名等をあなたのプロジェクトに書き換えてください。
+## 業務アプリへ拡張するとき
 
-| パス                            | 内容                            | 置き換え対象                           |
-| ------------------------------- | ------------------------------- | -------------------------------------- |
-| `scripts/setup_dataverse.py`    | Dataverse テーブル構築          | テーブル定義・列・Lookup・デモデータ   |
-| `scripts/deploy_agent.py`       | Copilot Studio エージェント設定 | BOT_NAME・Instructions・推奨プロンプト |
-| `scripts/deploy_flow.py`        | ステータス変更通知フロー        | テーブル名・通知メール本文             |
-| `scripts/deploy_flow_*.py`      | 各種 Power Automate フロー      | フロー定義全体                         |
-| `scripts/deploy_ai_prompt.py`   | AI Builder プロンプト           | プロンプト内容・入出力定義             |
-| `scripts/add_to_solution.py`    | ソリューション包含検証          | テーブル名リスト                       |
-| `src/pages/incidents.tsx`       | インシデント一覧ページ          | ページ全体                             |
-| `src/pages/incident-detail.tsx` | インシデント詳細ページ          | ページ全体                             |
-| `src/pages/dashboard.tsx`       | ダッシュボード                  | 集計ロジック・KPI                      |
-| `src/pages/kanban.tsx`          | カンバンボード                  | データソース                           |
-| `src/hooks/use-incidents.ts`    | データフェッチフック            | テーブル名・クエリ                     |
-| `src/types/incident.ts`         | 型定義                          | エンティティ型                         |
-
-### SDK 自動生成（環境ごとに再生成）
-
-| パス                | 内容                                                           |
-| ------------------- | -------------------------------------------------------------- |
-| `src/generated/`    | `npx power-apps add-data-source` で自動生成（.gitignore 対象） |
-| `.power/`           | Power Apps SDK 内部ファイル（.gitignore 対象）                 |
-| `power.config.json` | `npx power-apps init` で自動生成（.gitignore 対象）            |
-
-## 新しいプロジェクトの始め方
-
-### 方法 1: テンプレートとしてクローン
-
-```bash
-git clone https://github.com/yuseidemo/FirstCodeApps my-project
-cd my-project
-
-# 1. .env を設定
-cp .env.example .env
-# DATAVERSE_URL, TENANT_ID, SOLUTION_NAME, PUBLISHER_PREFIX を編集
-
-# 2. GitHub Copilot に指示（PowerCodeAgent エージェント）
-# @PowerCodeAgent {あなたのアプリ}を作成してください
-# → エージェントが setup_dataverse.py 等を自動生成
-```
-
-### 方法 2: 開発標準だけ導入（既存プロジェクトに追加）
-
-```powershell
-$base = "https://raw.githubusercontent.com/yuseidemo/FirstCodeApps/main"
-@(".github/agents", ".github/skills/power-platform-standard-skill", "docs") | ForEach-Object {
-  New-Item -ItemType Directory -Path $_ -Force
-}
-@(
-  @{Src="$base/.github/agents/PowerCodeAgent.agent.md"; Dst=".github/agents/PowerCodeAgent.agent.md"},
-  @{Src="$base/.github/skills/power-platform-standard-skill/SKILL.md"; Dst=".github/skills/power-platform-standard-skill/SKILL.md"},
-  @{Src="$base/docs/POWER_PLATFORM_DEVELOPMENT_STANDARD.md"; Dst="docs/POWER_PLATFORM_DEVELOPMENT_STANDARD.md"}
-) | ForEach-Object { Invoke-WebRequest -Uri $_.Src -OutFile $_.Dst }
-```
-
-## サンプルの置き換え手順
-
-1. **PowerCodeAgent エージェントに要件を伝える**
-   - エージェントが Phase 0（設計）から自動でガイド
-   - テーブル設計・UI 設計・エージェント設計をそれぞれ提案 → 承認後に実装
-
-2. **エージェントが以下を自動で行う**
-   - `setup_dataverse.py` を要件に合わせて新規生成
-   - `deploy_agent.py` のエージェント名・Instructions を更新
-   - `deploy_flow.py` のフロー定義を更新
-   - `src/pages/` をプロジェクトの画面設計に合わせて実装
-
-3. **手動で行うこと**
-   - `.env` の設定
-   - Copilot Studio UI でのエージェント作成
-   - Power Automate 接続の事前作成
-   - ナレッジ・MCP Server の UI での追加
+- `src/template-core/pages/` に新規ページを追加
+- データ取得が必要になった段階で hooks/services を段階的に追加
+- Dataverse 向けスクリプトは `scripts/` をベースにプロジェクトごとに調整

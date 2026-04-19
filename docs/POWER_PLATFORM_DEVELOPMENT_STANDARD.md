@@ -1622,7 +1622,7 @@ flowchart TD
 - [Power Automate Management API](https://learn.microsoft.com/ja-jp/power-automate/web-api)
 - [Copilot Studio 公式ドキュメント](https://learn.microsoft.com/ja-jp/microsoft-copilot-studio/)
 - [Dataverse Web API リファレンス](https://learn.microsoft.com/ja-jp/power-apps/developer/data-platform/webapi/overview)
-- [FirstCodeApps](https://github.com/yuseidemo/FirstCodeApps)
+- [CodeAppsTemplate](https://github.com/yuseidemo/CodeAppsTemplate)
 
 ---
 

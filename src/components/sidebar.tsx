@@ -1,21 +1,9 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  ShieldAlert,
-  LayoutDashboard,
-  Columns3,
-  Monitor,
-  type LucideIcon,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarContext } from "./sidebar-layout";
-
-type NavItem = {
-  icon: LucideIcon;
-  label: string;
-  path?: string;
-};
+import { appConfig } from "@/app-config";
 
 export function Sidebar() {
   const { isCollapsed, isMobileOpen, closeMobile } = useSidebarContext();
@@ -36,25 +24,7 @@ export function Sidebar() {
 
   const positionClasses = "top-16 h-[calc(100vh-4rem)]";
 
-  const navItems: { category: string; items: NavItem[] }[] = [
-    {
-      category: "メイン",
-      items: [
-        { icon: LayoutDashboard, label: "ダッシュボード", path: "dashboard" },
-      ],
-    },
-    {
-      category: "インシデント管理",
-      items: [
-        { icon: ShieldAlert, label: "インシデント", path: "incidents" },
-        { icon: Columns3, label: "カンバン", path: "kanban" },
-      ],
-    },
-    {
-      category: "マスタ管理",
-      items: [{ icon: Monitor, label: "IT 資産", path: "assets" }],
-    },
-  ];
+  const navItems = appConfig.navigation;
 
   return (
     <>

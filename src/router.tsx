@@ -1,23 +1,11 @@
-﻿import { createBrowserRouter, Navigate } from "react-router-dom";
+/* eslint-disable react-refresh/only-export-components */
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import Layout from "@/pages/_layout";
+import { appConfig } from "@/app-config";
 
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
 
-// ダッシュボード
-const DashboardPage = lazy(() => import("@/pages/dashboard"));
-
-// インシデント管理ページ
-const IncidentListPage = lazy(() => import("@/pages/incidents"));
-const IncidentDetailPage = lazy(() => import("@/pages/incident-detail"));
-
-// カンバンボード
-const KanbanPage = lazy(() => import("@/pages/kanban"));
-
-// IT 資産管理
-const AssetsPage = lazy(() => import("@/pages/assets"));
-
-// ローディングコンポーネント
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[400px]">
     <div className="flex flex-col items-center gap-2">
@@ -27,7 +15,6 @@ const PageLoader = () => (
   </div>
 );
 
-// Suspenseラッパー
 const withSuspense = (
   Component: React.LazyExoticComponent<() => React.JSX.Element>,
 ) => (
@@ -43,6 +30,15 @@ if (location.pathname.endsWith("/index.html")) {
   history.replaceState(null, "", BASENAME + location.search + location.hash);
 }
 
+const appRoutes = appConfig.routes.map((route) => ({
+  path: route.path,
+  element: withSuspense(lazy(route.component)),
+}));
+
+const defaultRoute = appConfig.initialRoute.startsWith("/")
+  ? appConfig.initialRoute
+  : `/${appConfig.initialRoute}`;
+
 export const router = createBrowserRouter(
   [
     {
@@ -50,12 +46,8 @@ export const router = createBrowserRouter(
       element: <Layout showHeader={true} />,
       errorElement: withSuspense(NotFoundPage),
       children: [
-        { index: true, element: <Navigate to="/dashboard" replace /> },
-        { path: "dashboard", element: withSuspense(DashboardPage) },
-        { path: "incidents", element: withSuspense(IncidentListPage) },
-        { path: "incidents/:id", element: withSuspense(IncidentDetailPage) },
-        { path: "kanban", element: withSuspense(KanbanPage) },
-        { path: "assets", element: withSuspense(AssetsPage) },
+        { index: true, element: <Navigate to={defaultRoute} replace /> },
+        ...appRoutes,
       ],
     },
   ],
