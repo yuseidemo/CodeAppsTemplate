@@ -22,6 +22,50 @@ $base = "https://raw.githubusercontent.com/yuseidemo/CodeAppsTemplate/main"
 ) | ForEach-Object { Invoke-WebRequest -Uri $_.Src -OutFile $_.Dst }
 ```
 
+上記は **最小セット**（共通標準）です。  
+`PowerCodeAgent` をフェーズ運用（設計→実装）で使う場合は、以下の **推奨セット** も追加してください。
+
+```powershell
+$base = "https://raw.githubusercontent.com/yuseidemo/CodeAppsTemplate/main"
+
+$skillNames = @(
+  "power-platform-standard-skill",
+  "architecture-design-skill",
+  "code-apps-design-skill",
+  "code-apps-dev-skill",
+  "power-automate-flow-skill",
+  "copilot-studio-agent-skill",
+  "copilot-studio-trigger-skill",
+  "ai-builder-prompt-skill",
+  "html-email-template-skill",
+  "market-research-report-skill",
+  "model-driven-app-skill",
+  "security-role-skill"
+)
+
+@(".github/agents", ".github/skills", "docs") | ForEach-Object {
+  New-Item -ItemType Directory -Path $_ -Force | Out-Null
+}
+
+@(
+  @{Src="$base/.github/agents/PowerCodeAgent.agent.md"; Dst=".github/agents/PowerCodeAgent.agent.md"},
+  @{Src="$base/docs/POWER_PLATFORM_DEVELOPMENT_STANDARD.md"; Dst="docs/POWER_PLATFORM_DEVELOPMENT_STANDARD.md"},
+  @{Src="$base/docs/DATAVERSE_GUIDE.md"; Dst="docs/DATAVERSE_GUIDE.md"}
+) | ForEach-Object {
+  Invoke-WebRequest -Uri $_.Src -OutFile $_.Dst
+}
+
+foreach ($skill in $skillNames) {
+  New-Item -ItemType Directory -Path ".github/skills/$skill" -Force | Out-Null
+  Invoke-WebRequest `
+    -Uri "$base/.github/skills/$skill/SKILL.md" `
+    -OutFile ".github/skills/$skill/SKILL.md"
+}
+```
+
+> [!TIP]
+> 既存プロジェクトに導入後、VS Code を再読み込みし、GitHub Copilot Chat で `@PowerCodeAgent` を選択してください。
+
 ---
 
 ## GitHub Copilot での活用
