@@ -16,8 +16,11 @@ VS Code で開くと `.github/agents/` と `.github/skills/` が自動認識さ�
 - 通常のセットアップと CI では `npm ci` を使用します。
 - 依存関係を追加・更新するときだけ `npm install` を使用し、`package.json` と `package-lock.json` を同じ Pull Request に含めます。
 - Dependabot が npm パッケージを毎週、GitHub Actions を毎月確認して更新 Pull Request を作成します。
+- npm のメジャー更新は自動PRの対象外です。破壊的変更を確認し、依存関係ごとに個別対応します。
 - Pull Request と `main` ブランチへの push では、lint、build、high 以上の脆弱性監査を実行します。
 - `main` への変更は Release Please が収集し、SemVer、`CHANGELOG.md`、GitHub Release をリリース Pull Request経由で更新します。
+
+Release Pleaseを利用するには、GitHubリポジトリの **Settings > Actions > General > Workflow permissions** で **Allow GitHub Actions to create and approve pull requests** を有効にしてください。
 
 Release Please は Conventional Commits に基づいてバージョンを決定します。
 

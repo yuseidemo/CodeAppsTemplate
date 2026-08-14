@@ -16,6 +16,8 @@
 
 ### Changed
 
+- Dependabotのnpmメジャー更新を自動PR対象外とし、破壊的変更を個別に検証する運用へ変更
+- Release Pleaseに必要なGitHub ActionsのPR作成権限設定をREADMEへ追加
 - PowerCodeAgentのモデル固定を解除し、VS Codeのモデルピッカーで選択したモデルを使用するよう変更
 - アーキテクチャ判断にモデル駆動型アプリの生成ページを追加
 - モデル駆動型アプリSkillと生成ページSkillの責務を分離
