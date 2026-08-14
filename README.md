@@ -5,10 +5,29 @@
 
 ```bash
 git clone https://github.com/yuseidemo/CodeAppsTemplate.git .
-npm install
+npm ci
 ```
 
 VS Code で開くと `.github/agents/` と `.github/skills/` が自動認識され、**PowerCodeAgent** エージェントが GitHub Copilot Chat で使えるようになります。
+
+### 依存関係とリリース
+
+- Node.js 24 LTS と npm 11 を使用します。Node.js のバージョンは `.nvmrc`、npm のバージョンは `package.json` で管理します。
+- 通常のセットアップと CI では `npm ci` を使用します。
+- 依存関係を追加・更新するときだけ `npm install` を使用し、`package.json` と `package-lock.json` を同じ Pull Request に含めます。
+- Dependabot が npm パッケージを毎週、GitHub Actions を毎月確認して更新 Pull Request を作成します。
+- Pull Request と `main` ブランチへの push では、lint、build、high 以上の脆弱性監査を実行します。
+- `main` への変更は Release Please が収集し、SemVer、`CHANGELOG.md`、GitHub Release をリリース Pull Request経由で更新します。
+
+Release Please は Conventional Commits に基づいてバージョンを決定します。
+
+| 接頭辞             | バージョン | 用途                     |
+| ------------------ | ---------- | ------------------------ |
+| `fix:`             | PATCH      | 後方互換のある不具合修正 |
+| `feat:`            | MINOR      | 後方互換のある機能追加   |
+| `feat!:` / `fix!:` | MAJOR      | 破壊的変更               |
+
+例: `feat: add reusable data table component`
 
 ### 既存プロジェクトに開発標準だけ追加する場合
 
@@ -40,6 +59,7 @@ $skillNames = @(
   "html-email-template-skill",
   "market-research-report-skill",
   "model-driven-app-skill",
+  "generative-page-skill",
   "security-role-skill"
 )
 
@@ -153,7 +173,7 @@ https://github.com/yuseidemo/CodeAppsTemplate
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | Visual Studio Code  | [Power Platform Tools 拡張機能](https://marketplace.visualstudio.com/items?itemName=microsoft-IsvExpTools.powerplatform-vscode) をインストール |
 | GitHub Copilot      | VS Code に GitHub Copilot 拡張機能をインストール（推奨モデル: Claude Opus 4.6）                                                                |
-| Node.js             | LTS バージョン v18.x / v20.x                                                                                                                   |
+| Node.js             | LTS バージョン v24.x                                                                                                                           |
 | Python 3.10+        | Dataverse 自動化スクリプト用                                                                                                                   |
 | PAC CLI             | 最新バージョン                                                                                                                                 |
 | Power Platform 環境 | Code Apps が有効化されていること                                                                                                               |
@@ -276,7 +296,7 @@ api_put(f"EntityDefinitions({data['MetadataId']})", body)
 
 ```bash
 # 1. 依存関係インストール
-npm install
+npm ci
 
 # 2. 先にビルド＆デプロイ — Dataverse 接続確立のため
 npm run build
@@ -298,7 +318,7 @@ npx power-apps push --solution-id {SolutionName}
 
 | レイヤー          | 技術                     |
 | ----------------- | ------------------------ |
-| UI フレームワーク | React 18 + TypeScript    |
+| UI フレームワーク | React 19 + TypeScript    |
 | スタイリング      | Tailwind CSS + shadcn/ui |
 | データフェッチ    | TanStack React Query     |
 | ルーティング      | React Router             |

@@ -2,7 +2,6 @@
 name: PowerCodeAgent
 description: "Power Platform コードファースト開発エキスパート。Code Apps・Dataverse・Power Automate・Copilot Studio を統合的に開発する。Use when: Power Platform, Dataverse, Code Apps, Power Automate, フロー, Copilot Studio, テーブル作成, エージェント開発, ソリューション開発"
 tools: [read, edit, search, execute, web, agent, todo]
-model: "Claude Opus 4.6"
 argument-hint: "Power Platform の開発作業を指示してください（例: Dataverse テーブルを作成して、Code Apps をデプロイして、Power Automate フローを作成して、エージェントを構築して）"
 ---
 
@@ -33,16 +32,18 @@ argument-hint: "Power Platform の開発作業を指示してください（例:
 
 ### フェーズ別スキル（該当フェーズ開始時に読む）
 
-| フェーズ                   | スキル                         | 読み込みパス                                           |
-| -------------------------- | ------------------------------ | ------------------------------------------------------ |
-| Phase 2: Code Apps UI 設計 | `code-apps-design-skill`       | `.github/skills/code-apps-design-skill/SKILL.md`       |
-| Phase 2: Code Apps 開発    | `code-apps-dev-skill`          | `.github/skills/code-apps-dev-skill/SKILL.md`          |
-| Phase 2.5: Power Automate  | `power-automate-flow-skill`    | `.github/skills/power-automate-flow-skill/SKILL.md`    |
-| Phase 3: Copilot Studio    | `copilot-studio-agent-skill`   | `.github/skills/copilot-studio-agent-skill/SKILL.md`   |
-| Phase 3.5: CS トリガー     | `copilot-studio-trigger-skill` | `.github/skills/copilot-studio-trigger-skill/SKILL.md` |
-| Phase 4: AI Builder Prompt | `ai-builder-prompt-skill`      | `.github/skills/ai-builder-prompt-skill/SKILL.md`      |
-| HTML メール送信            | `html-email-template-skill`    | `.github/skills/html-email-template-skill/SKILL.md`    |
-| 自動リサーチレポート       | `market-research-report-skill` | `.github/skills/market-research-report-skill/SKILL.md` |
+| フェーズ                    | スキル                         | 読み込みパス                                           |
+| --------------------------- | ------------------------------ | ------------------------------------------------------ |
+| Phase 2: Code Apps UI 設計  | `code-apps-design-skill`       | `.github/skills/code-apps-design-skill/SKILL.md`       |
+| Phase 2: Code Apps 開発     | `code-apps-dev-skill`          | `.github/skills/code-apps-dev-skill/SKILL.md`          |
+| Phase 2.1: Model-Driven App | `model-driven-app-skill`       | `.github/skills/model-driven-app-skill/SKILL.md`       |
+| Phase 2.2: 生成ページ       | `generative-page-skill`        | `.github/skills/generative-page-skill/SKILL.md`        |
+| Phase 2.5: Power Automate   | `power-automate-flow-skill`    | `.github/skills/power-automate-flow-skill/SKILL.md`    |
+| Phase 3: Copilot Studio     | `copilot-studio-agent-skill`   | `.github/skills/copilot-studio-agent-skill/SKILL.md`   |
+| Phase 3.5: CS トリガー      | `copilot-studio-trigger-skill` | `.github/skills/copilot-studio-trigger-skill/SKILL.md` |
+| Phase 4: AI Builder Prompt  | `ai-builder-prompt-skill`      | `.github/skills/ai-builder-prompt-skill/SKILL.md`      |
+| HTML メール送信             | `html-email-template-skill`    | `.github/skills/html-email-template-skill/SKILL.md`    |
+| 自動リサーチレポート        | `market-research-report-skill` | `.github/skills/market-research-report-skill/SKILL.md` |
 
 > **重要**: Code Apps は **`code-apps-design-skill` → ユーザー承認 → `code-apps-dev-skill`** の順で進める。
 > Power Automate・Copilot Studio も**設計提示 → ユーザー承認 → 実装**の順で進める。
@@ -151,16 +152,19 @@ argument-hint: "Power Platform の開発作業を指示してください（例:
 
 59. **既存アプリの SiteMap は PATCH で XML を直接更新**。新しい SiteMap を作成して `AddAppComponents` で追加すると `0x80050111` (App can't have multiple site maps) エラー。既存 SiteMap を `appmodulecomponent?$filter=componenttype eq 62` で特定し、`PATCH sitemaps({id})` で `sitemapxml` を更新する
 60. **`appmodulecomponent` は `appmoduleidunique` でフィルタ不可**。プロパティが存在しない。`componenttype eq 62` で全件取得し `objectid` で照合する
+61. **生成ページは `generative-page-skill` とMicrosoft公式 `/genpage` を使う**。生成ページは `savedquery` / `systemform` ではなくReact + TypeScriptのUX Agent Projectであり、独自デプロイスクリプトで代替しない
+62. **生成ページも設計→ユーザー承認→実装の順序を守る**。対象アプリ、ソリューション、テーブル、ページ構成、操作、入力パラメータ、検証方法を提示し、承認後にコード生成・テーブル作成・アップロードを行う
+63. **生成ページのデータ操作はランタイムの `dataApi` を使う**。論理名と明示的な `select` を使用し、`queryTable` のページング、Choiceの `getChoices`、CRUDのエラー処理を実装する
 
 ### 設計フェーズ（最重要 — 全フェーズ共通原則）
 
-61. **全フェーズで設計→ユーザー承認→実装の順序を守る**。Dataverse・Code Apps・Power Automate・Copilot Studio のいずれも、設計をユーザーに提示し「この設計で進めてよいですか？」と承認を得てから構築に進む
-62. **テーブル設計**: 全 Lookup リレーションシップを設計書に明記。漏れると Lookup が機能しない
-63. **テーブル設計**: デモデータは全テーブル（従属テーブル含む）に計画。コメント等の従属テーブルにもデモデータを用意
-64. **テーブル設計**: マスタテーブルは要件から網羅的に洗い出す。カテゴリ・場所・設備等、ユーザーが言及した分類はすべてマスタ化
-65. **Code Apps 設計**: `code-apps-design-skill` スキルを読み、画面構成・コンポーネント選定・Lookup 名前解決パターンを設計。ユーザー承認後に `code-apps-dev-skill` で実装
-66. **Power Automate 設計**: フロー名・トリガー・アクション・接続・通知先を設計書として提示。ユーザー承認後にデプロイスクリプトを作成
-67. **Copilot Studio 設計**: エージェント名・Instructions・推奨プロンプト・会話の開始のメッセージ・会話の開始のクイック返信・ナレッジ・ツール（MCP Server）を設計書として提示。ユーザー承認後に構築
+64. **全フェーズで設計→ユーザー承認→実装の順序を守る**。Dataverse・Code Apps・生成ページ・Power Automate・Copilot Studio のいずれも、設計をユーザーに提示し「この設計で進めてよいですか？」と承認を得てから構築に進む
+65. **テーブル設計**: 全 Lookup リレーションシップを設計書に明記。漏れると Lookup が機能しない
+66. **テーブル設計**: デモデータは全テーブル（従属テーブル含む）に計画。コメント等の従属テーブルにもデモデータを用意
+67. **テーブル設計**: マスタテーブルは要件から網羅的に洗い出す。カテゴリ・場所・設備等、ユーザーが言及した分類はすべてマスタ化
+68. **Code Apps 設計**: `code-apps-design-skill` スキルを読み、画面構成・コンポーネント選定・Lookup 名前解決パターンを設計。ユーザー承認後に `code-apps-dev-skill` で実装
+69. **Power Automate 設計**: フロー名・トリガー・アクション・接続・通知先を設計書として提示。ユーザー承認後にデプロイスクリプトを作成
+70. **Copilot Studio 設計**: エージェント名・Instructions・推奨プロンプト・会話の開始のメッセージ・会話の開始のクイック返信・ナレッジ・ツール（MCP Server）を設計書として提示。ユーザー承認後に構築
 
 ## 作業手順
 
@@ -215,6 +219,23 @@ Power Platform のプロジェクトを構築する際は、以下のフェー�
 5. `npx power-apps add-data-source`（全テーブルに対して実行。`src/generated/` と `dataSourcesInfo.ts` が自動生成される）
 6. SDK 生成サービスのラッパー + 型定義 + ページ実装（承認済み設計に従う）
 7. ビルド＆再デプロイ
+
+### Phase 2.1: Model-Driven App（設計→承認→実装）
+
+1. `model-driven-app-skill` スキルを読み込む
+2. AppModule、SiteMap、標準ビュー/フォーム、セキュリティロールを設計する
+3. **ユーザーに設計を提示し、承認を得る**
+4. 承認後に `scripts/deploy_model_driven_app.py` で構築・公開する
+
+### Phase 2.2: 生成ページ（設計→承認→実装）
+
+1. `generative-page-skill` スキルを読み込む
+2. 既存モデル駆動型アプリへ追加するページ、Dataverseテーブル、UI、操作、入力パラメータ、多言語、検証方法を設計する
+3. **ユーザーに生成ページ設計を提示し、承認を得る**
+4. Microsoft公式 `model-apps@power-platform-skills` の `/genpage` でReact + TypeScriptコードを作成または編集する
+5. `dataApi`、型チェック、アクセシビリティ、セキュリティ、CRUD、ページングをレビューする
+6. `pac model genpage upload` でデプロイし、対象アプリを公開する
+7. ブラウザで動作確認し、ソリューションの依存関係にUX Agent Projectが含まれることを確認する
 
 ### Phase 2.5: Power Automate フロー（設計→承認→実装）
 

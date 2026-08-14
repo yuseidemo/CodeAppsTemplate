@@ -1,6 +1,6 @@
 ---
 name: model-driven-app-skill
-description: "モデル駆動型アプリを Dataverse Web API で作成・公開する。Use when: モデル駆動型アプリ, Model-Driven App, AppModule, SiteMap, ナビゲーション, ビュー, フォーム, セキュリティロール, appmodules, PublishXml, ValidateApp, AddAppComponents"
+description: "モデル駆動型アプリを Dataverse Web API で作成・公開する。Use when: モデル駆動型アプリ, Model-Driven App, AppModule, SiteMap, ナビゲーション, 標準ビュー, 標準フォーム, セキュリティロール, appmodules, PublishXml, ValidateApp, AddAppComponents"
 ---
 
 # モデル駆動型アプリ構築スキル
@@ -9,6 +9,8 @@ Dataverse Web API（`appmodules` / `sitemaps` テーブル）でモデル駆動�
 
 > **前提**: `setup_dataverse.py` で Dataverse テーブルが作成済みであること。
 > テーブルが存在しないとアプリに追加するコンポーネントがない。
+
+> **生成ページは別Skill**: React + TypeScriptの生成ページ（Generative page / GenPage / GenUX）を追加・編集する場合は、`generative-page-skill` を読み込む。このSkillはAppModule、SiteMap、標準ビュー、標準フォームの構築を担当し、生成ページのコード生成やアップロードは担当しない。
 
 ## 大前提: 一つのソリューション内に開発
 
@@ -111,12 +113,12 @@ webresourceid: アイコン用 WebResource ID
 
 ### SiteMap XML 必須属性一覧
 
-| 要素    | 必須属性                                               | 説明                                              |
-| ------- | ------------------------------------------------------ | ------------------------------------------------- |
-| SiteMap | `IntroducedVersion="7.0.0.0"`                          | バージョニング用。Unified Interface で必要        |
-| Area    | `ShowGroups="true"`, `IntroducedVersion="7.0.0.0"`     | ShowGroups がないと複数グループが表示されない      |
-| Group   | `IntroducedVersion="7.0.0.0"`, `IsProfile="false"`     | IsProfile=false でプロファイルグループと区別       |
-| SubArea | `Entity`, `AvailableOffline="true"`                     | オフラインアクセス。モバイル対応に必要             |
+| 要素    | 必須属性                                           | 説明                                          |
+| ------- | -------------------------------------------------- | --------------------------------------------- |
+| SiteMap | `IntroducedVersion="7.0.0.0"`                      | バージョニング用。Unified Interface で必要    |
+| Area    | `ShowGroups="true"`, `IntroducedVersion="7.0.0.0"` | ShowGroups がないと複数グループが表示されない |
+| Group   | `IntroducedVersion="7.0.0.0"`, `IsProfile="false"` | IsProfile=false でプロファイルグループと区別  |
+| SubArea | `Entity`, `AvailableOffline="true"`                | オフラインアクセス。モバイル対応に必要        |
 
 ### Title は属性ではなく Titles 子要素で指定する
 
@@ -479,6 +481,7 @@ requests.put(
 
 > ★ **全パターンで `ShowGroups="true"`・`IntroducedVersion="7.0.0.0"`・`<Titles>` 要素・`AvailableOffline="true"` を必ず含める。**
 > これらが欠けると複数グループが正常に表示されない。
+
 ```
 
 ## コンポーネントタイプ定数
@@ -514,9 +517,11 @@ requests.put(
 アプリには SiteMap を 1 つしか持てない。
 
 ```
+
 ❌ 新しい SiteMap を作成 → AddAppComponents で追加 → 0x80050111 エラー
 ✅ 既存 SiteMap を見つけて PATCH で XML を直接更新する
-```
+
+````
 
 **既存 SiteMap の特定方法**:
 
@@ -547,7 +552,7 @@ requests.patch(
     headers=headers,
     json={"sitemapxml": new_sitemap_xml},
 )
-```
+````
 
 > **教訓**: SiteMap を誤って新規作成してしまった場合は `DELETE sitemaps({id})` で削除する。
 > `appmodulecomponent` テーブルは `appmoduleidunique` プロパティを持たないため、
@@ -590,27 +595,27 @@ requests.patch(
 
 ## クイックリファレンス: 絶対遵守ルール
 
-| ルール                                           | 理由                                                |
-| ------------------------------------------------ | --------------------------------------------------- |
-| `clienttype=4` (Unified Interface) を必ず指定     | 未指定だとレガシー Web クライアント用アプリになる    |
-| uniquename は英語のみ                             | 日本語は API エラーになる                            |
-| SiteMap は `isappaware: true` で作成              | アプリ固有 SiteMap として認識させる                  |
-| SiteMap を AddAppComponents で追加                | 追加しないと ValidateApp でエラー                    |
-| **`ShowGroups="true"` を Area に指定**             | **未指定だと最初のグループしか表示されない（最重要）** |
-| **`IntroducedVersion="7.0.0.0"` を全要素に指定**  | Unified Interface で必須。欠けると表示不具合          |
-| **Title は `<Titles>` 子要素で指定**               | 属性ではなくネスト要素が正式フォーマット              |
-| **`AvailableOffline="true"` を SubArea に指定**    | モバイル対応・オフラインアクセスに必要                |
-| ビュー・フォームを追加するとテーブルも含まれる    | テーブル直接追加は不要（API で追加もできない）        |
-| Basic User ロールを関連付け                       | ユーザーがアプリを表示できるようにする                |
-| 公開前に ValidateApp で検証                       | エラーがあると公開しても正常動作しない                |
-| AddSolutionComponent でソリューション含有検証     | MSCRM.SolutionName ヘッダーだけに依存しない          |
-| べき等デプロイパターンを使う                      | uniquename で検索 → 更新 or 新規作成                 |
-| **ビューのプライマリ列は常に先頭**                 | `_name` 列を LayoutXml の最初の `<cell>` にする      |
-| **複数行テキスト（Memo）はビューに含めない**       | 一覧表示で見づらいため。フォームのみに表示            |
-| **テーブルアイコンは SVG で設定**                   | `IconVectorName` + Web Resource (type=11)            |
-| **`IconVectorName` は PUT で設定**                  | `MSCRM.MergeLabels: true` 必須                       |
-| **AddAppComponents は 50 件ずつバッチ分割**         | 大量送信は失敗する場合あり。失敗時は 1 件ずつ再試行   |
-| **アプリ URL は `main.aspx?appid=`**                | `/apps/{id}` 形式ではない                             |
-| **PublishXml はテーブル単位で個別公開**              | `PublishAllXml` より高速                              |
-| **既存 SiteMap は PATCH で XML 更新**                | 新 SiteMap を AddAppComponents で追加すると 0x80050111 |
-| **appmodulecomponent は appmoduleidunique で検索不可**| componenttype=62 で全件取得し objectid で照合          |
+| ルール                                                 | 理由                                                   |
+| ------------------------------------------------------ | ------------------------------------------------------ |
+| `clienttype=4` (Unified Interface) を必ず指定          | 未指定だとレガシー Web クライアント用アプリになる      |
+| uniquename は英語のみ                                  | 日本語は API エラーになる                              |
+| SiteMap は `isappaware: true` で作成                   | アプリ固有 SiteMap として認識させる                    |
+| SiteMap を AddAppComponents で追加                     | 追加しないと ValidateApp でエラー                      |
+| **`ShowGroups="true"` を Area に指定**                 | **未指定だと最初のグループしか表示されない（最重要）** |
+| **`IntroducedVersion="7.0.0.0"` を全要素に指定**       | Unified Interface で必須。欠けると表示不具合           |
+| **Title は `<Titles>` 子要素で指定**                   | 属性ではなくネスト要素が正式フォーマット               |
+| **`AvailableOffline="true"` を SubArea に指定**        | モバイル対応・オフラインアクセスに必要                 |
+| ビュー・フォームを追加するとテーブルも含まれる         | テーブル直接追加は不要（API で追加もできない）         |
+| Basic User ロールを関連付け                            | ユーザーがアプリを表示できるようにする                 |
+| 公開前に ValidateApp で検証                            | エラーがあると公開しても正常動作しない                 |
+| AddSolutionComponent でソリューション含有検証          | MSCRM.SolutionName ヘッダーだけに依存しない            |
+| べき等デプロイパターンを使う                           | uniquename で検索 → 更新 or 新規作成                   |
+| **ビューのプライマリ列は常に先頭**                     | `_name` 列を LayoutXml の最初の `<cell>` にする        |
+| **複数行テキスト（Memo）はビューに含めない**           | 一覧表示で見づらいため。フォームのみに表示             |
+| **テーブルアイコンは SVG で設定**                      | `IconVectorName` + Web Resource (type=11)              |
+| **`IconVectorName` は PUT で設定**                     | `MSCRM.MergeLabels: true` 必須                         |
+| **AddAppComponents は 50 件ずつバッチ分割**            | 大量送信は失敗する場合あり。失敗時は 1 件ずつ再試行    |
+| **アプリ URL は `main.aspx?appid=`**                   | `/apps/{id}` 形式ではない                              |
+| **PublishXml はテーブル単位で個別公開**                | `PublishAllXml` より高速                               |
+| **既存 SiteMap は PATCH で XML 更新**                  | 新 SiteMap を AddAppComponents で追加すると 0x80050111 |
+| **appmodulecomponent は appmoduleidunique で検索不可** | componenttype=62 で全件取得し objectid で照合          |
