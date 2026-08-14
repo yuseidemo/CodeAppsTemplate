@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.0 (2026-08-14)
+
+
+### Features
+
+* add release management and generative page support ([2d7641e](https://github.com/yuseidemo/CodeAppsTemplate/commit/2d7641e3a62f59e1bf844cb20a117baa652f7be1))
+* migrate to template-core dashboard and update repo references ([c498ca4](https://github.com/yuseidemo/CodeAppsTemplate/commit/c498ca4401c71d2e945db50ee4a9b53d6e2db90e))
+
+
+### Bug Fixes
+
+* stabilize dependency and release automation ([65097fc](https://github.com/yuseidemo/CodeAppsTemplate/commit/65097fc58d14b491ba4dcf46a45c491dae299da3))
+
+## Changelog
+
 このプロジェクトの主な変更を記録します。バージョン管理は Semantic Versioning に従います。
 
 ## Unreleased
