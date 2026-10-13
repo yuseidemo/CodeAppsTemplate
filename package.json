@@ -1,7 +1,7 @@
 {
   "name": "power-apps-template-starter",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "packageManager": "npm@11.12.1",
   "engines": {
     "node": ">=24 <25",
